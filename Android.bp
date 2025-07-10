@@ -1,5 +1,8 @@
 package {
-    default_visibility: [":__subpackages__"],
+    default_visibility: [
+        ":__subpackages__",
+        "//vendor:__subpackages__",
+    ],
 }
 
 cc_library_headers {
@@ -369,6 +372,7 @@ cc_defaults {
     ],
     shared_libs: [
         "libcamera_metadata",
+        "libcutils",
         "libdrm",
         "libexif",
         "libgbm",
@@ -396,8 +400,9 @@ cc_defaults {
         "src/android/jpeg/exif.cpp",
         "src/android/jpeg/post_processor_jpeg.cpp",
         "src/android/jpeg/thumbnailer.cpp",
-        "src/android/mm/generic_camera_buffer.cpp",
-        "src/android/mm/generic_frame_buffer_allocator.cpp",
+        "src/android/mm/BufferAdapter.cpp",
+        "src/android/mm/cros_camera_buffer.cpp",
+        "src/android/mm/cros_frame_buffer_allocator.cpp",
         "src/android/mm/allocator.cpp",
         "src/android/mm/camera_buffer_manager_impl.cpp",
         "src/android/mm/minigbm_allocator.cpp",
@@ -444,6 +449,18 @@ cc_library_shared {
         "libcamera_src_defaults",
         "libcamera_android_src_defaults",
         "libcamera_virtual_src_defaults",
+    ],
+}
+
+cc_library_shared {
+    name: "camera.libcamera_hal_base",
+    cppflags: [
+        "-DPIPELINE_PROXY_DIR=\"/vendor/lib64/libcamera/pipeline\"",
+    ],
+    defaults: [
+        "libcamera_src_defaults",
+        "libcamera_android_src_defaults",
+        "libipu7_ipa_proxy",
     ],
 }
 
