@@ -14,6 +14,10 @@
 #include <unistd.h>
 #include <vector>
 
+#ifdef HAVE_ANDROID_OS
+#include <cutils/properties.h>
+#endif
+
 #include <libcamera/base/log.h>
 #include <libcamera/base/span.h>
 #include <libcamera/base/unique_fd.h>
@@ -1020,7 +1024,7 @@ int CameraDevice::processControls(Camera3RequestDescriptor *descriptor)
 	if (settings.getEntry(ANDROID_CONTROL_AF_REGIONS, &entry)) {
 		const int32_t *data = entry.data.i32;
 		std::vector<Rectangle> afWindows;
-		for (size_t i = 0; i < entry.count; i++) {
+		for (size_t i = 0; i + 4 < entry.count; i += 5) {
 			size_t j = i * 5;
 			afWindows.push_back(Rectangle{
 				data[j], data[j + 1],
@@ -2481,6 +2485,15 @@ void CameraDevice::cameraDisconnected()
 
 void CameraDevice::queryManufacturerInfo()
 {
+#ifdef HAVE_ANDROID_OS
+	char model[255] = { '\0' };
+	property_get("ro.product.model", model, defaultModel_.c_str());
+	model_ = model;
+
+	char maker[255] = { '\0' };
+	property_get("ro.product.manufacturer", maker, defaultMaker_.c_str());
+	maker_ = maker;
+#else
 	/* \todo Support getting properties on Android */
 	std::ifstream fstream("/var/cache/camera/camera.prop");
 	if (!fstream.is_open())
@@ -2499,4 +2512,5 @@ void CameraDevice::queryManufacturerInfo()
 		else if (!key.compare("ro.product.manufacturer"))
 			maker_ = val;
 	}
+#endif
 }
